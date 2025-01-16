@@ -6244,11 +6244,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\srdic\\source\\repos\\MovieAPIDemo\\MovieAPIDemo\\MovieAPIDemo.csproj",
+      "projectUniqueName": "C:\\Users\\srdic\\OneDrive\\Documents\\GitHub\\MovieDemo\\MovieAPIDemo\\MovieAPIDemo\\MovieAPIDemo.csproj",
       "projectName": "MovieAPIDemo",
-      "projectPath": "C:\\Users\\srdic\\source\\repos\\MovieAPIDemo\\MovieAPIDemo\\MovieAPIDemo.csproj",
+      "projectPath": "C:\\Users\\srdic\\OneDrive\\Documents\\GitHub\\MovieDemo\\MovieAPIDemo\\MovieAPIDemo\\MovieAPIDemo.csproj",
       "packagesPath": "C:\\Users\\srdic\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\srdic\\source\\repos\\MovieAPIDemo\\MovieAPIDemo\\obj\\",
+      "outputPath": "C:\\Users\\srdic\\OneDrive\\Documents\\GitHub\\MovieDemo\\MovieAPIDemo\\MovieAPIDemo\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\srdic\\AppData\\Roaming\\NuGet\\NuGet.Config",
