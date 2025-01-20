@@ -5,8 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using MovieAPIDemo.Data;
 using MovieAPIDemo.Entities;
 using MovieAPIDemo.Models;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace MovieAPIDemo.Controllers
 {
@@ -233,6 +237,85 @@ namespace MovieAPIDemo.Controllers
                 response.Message = "Something went wrong.";
 
                 return BadRequest(response);
+            }
+        }
+
+        [HttpDelete]
+        public IActionResult Delete(int id)
+        {
+            BaseResponseModel response = new BaseResponseModel();
+
+            try
+            {
+                var movie = _context.Movie.Where(x => x.Id == id).FirstOrDefault();
+
+                if(movie == null)
+                {
+                    response.Status = false;
+                    response.Message = "Invalid Movie Record.";
+
+                    return BadRequest(response);
+                }
+
+                _context.Movie.Remove(movie);
+                _context.SaveChanges();
+
+                response.Status = true;
+                response.Message = "Deleted successfully.";
+                
+                return Ok(response);
+            }
+            catch (System.Exception ex)
+            {
+                response.Status = false;
+                response.Message = "Something went wrong";
+
+                return BadRequest(response);
+            }
+        }
+
+        [HttpPost]
+        [Route("upload-movie-poster")]
+        public async Task<IActionResult> UploadMoviePoster(IFormFile imageFile)
+        {
+            try
+            {
+                var filename = ContentDispositionHeaderValue.Parse(imageFile.ContentDisposition).FileName.TrimStart('\"').TrimEnd('\"');
+                string newPath = @"C:\to-delete";
+
+                if(!Directory.Exists(newPath))
+                {
+                    Directory.CreateDirectory(newPath);
+                }
+
+                string[] allowedImageExtensions = new string[] { ".jgp", ".jpeg", ".png" };
+
+                if(!allowedImageExtensions.Contains(Path.GetExtension(filename)))
+                {
+                    return BadRequest(new BaseResponseModel
+                    {
+                        Status = false,
+                        Message = "Only .jpg, .jpeg and .png type files are allowed"
+                    });
+                }
+
+                string newFileName = Guid.NewGuid() + Path.GetExtension(filename);
+                string fullFilePath = Path.Combine(newPath, newFileName);
+
+                using(var stream = new FileStream(fullFilePath, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(stream);
+                }
+
+                return Ok(new { ProfileImage = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/StaticFiles/{newFileName}" });
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new BaseResponseModel
+                {
+                    Status = false,
+                    Message = "Error Occured"
+                });
             }
         }
     }
