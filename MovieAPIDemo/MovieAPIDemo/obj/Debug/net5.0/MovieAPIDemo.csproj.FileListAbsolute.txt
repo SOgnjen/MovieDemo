@@ -128,3 +128,5 @@ C:\Users\srdic\OneDrive\Documents\GitHub\MovieDemo\MovieAPIDemo\MovieAPIDemo\obj
 C:\Users\srdic\OneDrive\Documents\GitHub\MovieDemo\MovieAPIDemo\MovieAPIDemo\obj\Debug\net5.0\MovieAPIDemo.pdb
 C:\Users\srdic\OneDrive\Documents\GitHub\MovieDemo\MovieAPIDemo\MovieAPIDemo\obj\Debug\net5.0\MovieAPIDemo.genruntimeconfig.cache
 C:\Users\srdic\OneDrive\Documents\GitHub\MovieDemo\MovieAPIDemo\MovieAPIDemo\obj\Debug\net5.0\ref\MovieAPIDemo.dll
+C:\Users\srdic\OneDrive\Documents\GitHub\MovieDemo\MovieAPIDemo\MovieAPIDemo\bin\Debug\net5.0\AutoMapper.dll
+C:\Users\srdic\OneDrive\Documents\GitHub\MovieDemo\MovieAPIDemo\MovieAPIDemo\bin\Debug\net5.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll

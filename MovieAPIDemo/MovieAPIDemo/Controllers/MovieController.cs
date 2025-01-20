@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieAPIDemo.Data;
 using MovieAPIDemo.Entities;
 using MovieAPIDemo.Models;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MovieAPIDemo.Controllers
@@ -13,10 +15,12 @@ namespace MovieAPIDemo.Controllers
     public class MovieController : ControllerBase
     {
         private readonly MovieDbContext _context;
+        private readonly IMapper _mapper;
 
-        public MovieController(MovieDbContext context)
+        public MovieController(MovieDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -27,20 +31,7 @@ namespace MovieAPIDemo.Controllers
             try
             {
                 var movieCount = _context.Movie.Count();
-                var movieList = _context.Movie.Include(x => x.Actors).Skip(pageIndex * pageSize).Take(pageSize).Select(x => new MovieListViewModel
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    Actors = x.Actors.Select(y => new ActorViewModel 
-                    { 
-                        Id = y.Id,
-                        Name = y.Name,
-                        DateOfBirth = y.DateOfBirth
-                    }).ToList(),
-                    CoverImage = x.CoverImage,
-                    Language = x.Language,
-                    ReleaseDate = x.ReleaseDate
-                }).ToList();
+                var movieList = _mapper.Map<List<MovieListViewModel>> (_context.Movie.Include(x => x.Actors).Skip(pageIndex * pageSize).Take(pageSize).ToList());
 
                 response.Status = true;
                 response.Message = "Success";
@@ -64,21 +55,7 @@ namespace MovieAPIDemo.Controllers
 
             try
             {
-                var movie = _context.Movie.Include(x => x.Actors).Where(x => x.Id == id).Select(x => new MovieDetailsViewModel
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    Actors = x.Actors.Select(y => new ActorViewModel
-                    {
-                        Id = y.Id,
-                        Name = y.Name,
-                        DateOfBirth = y.DateOfBirth
-                    }).ToList(),
-                    CoverImage = x.CoverImage,
-                    Language = x.Language,
-                    ReleaseDate = x.ReleaseDate,
-                    Description = x.Description
-                }).FirstOrDefault();
+                var movie = _context.Movie.Include(x => x.Actors).Where(x => x.Id == id).FirstOrDefault();
 
                 if(movie == null)
                 {
@@ -88,9 +65,11 @@ namespace MovieAPIDemo.Controllers
                     return BadRequest(response);
                 }
 
+                var movieData = _mapper.Map<MovieDetailsViewModel>(movie);
+
                 response.Status = true;
                 response.Message = "Success";
-                response.Data = movie;
+                response.Data = movieData;
 
                 return Ok(response);
             }
@@ -122,33 +101,13 @@ namespace MovieAPIDemo.Controllers
                         return BadRequest(response);
                     }
 
-                    var postedModel = new Movie()
-                    {
-                        Title = model.Title,
-                        Language = model.Language,
-                        CoverImage = model.CoverImage,
-                        Description = model.Description,
-                        Actors = actors
-                    };
+                    var postedModel = _mapper.Map<Movie>(model);
+                    postedModel.Actors = actors;
 
                     _context.Movie.Add(postedModel);
                     _context.SaveChanges();
 
-                    var responseData = new MovieDetailsViewModel
-                    {
-                        Id = postedModel.Id,
-                        Title = postedModel.Title,
-                        Actors = postedModel.Actors.Select(y => new ActorViewModel
-                        {
-                            Id = y.Id,
-                            Name = y.Name,
-                            DateOfBirth = y.DateOfBirth
-                        }).ToList(),
-                        CoverImage = postedModel.CoverImage,
-                        Language = postedModel.Language,
-                        ReleaseDate = postedModel.ReleaseDate,
-                        Description = postedModel.Description
-                    };
+                    var responseData = _mapper.Map<MovieDetailsViewModel>(postedModel);
 
                     response.Status = true;
                     response.Message = "Created successfully";

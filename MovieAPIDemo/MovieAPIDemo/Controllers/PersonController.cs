@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MovieAPIDemo.Data;
 using MovieAPIDemo.Entities;
 using MovieAPIDemo.Models;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MovieAPIDemo.Controllers
@@ -12,10 +14,12 @@ namespace MovieAPIDemo.Controllers
     public class PersonController : ControllerBase
     {
         private readonly MovieDbContext _context;
+        private readonly IMapper _mapper;
 
-        public PersonController(MovieDbContext context)
+        public PersonController(MovieDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -26,12 +30,7 @@ namespace MovieAPIDemo.Controllers
             try
             {
                 var actorCount = _context.Person.Count();
-                var actorList = _context.Person.Skip(pageIndex * pageSize).Take(pageSize).Select(x => new ActorViewModel
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    DateOfBirth = x.DateOfBirth
-                }).ToList();
+                var actorList = _mapper.Map<List<ActorViewModel>>(_context.Person.Skip(pageIndex * pageSize).Take(pageSize).ToList());
 
                 response.Status = true;
                 response.Message = "Success";
@@ -65,13 +64,7 @@ namespace MovieAPIDemo.Controllers
                     return BadRequest(response);
                 }
 
-                var personData = new ActorDetailsViewModel
-                {
-                    Id = person.Id,
-                    DateOfBirth = person.DateOfBirth,
-                    Name = person.Name,
-                    Movies = _context.Movie.Where(x => x.Actors.Contains(person)).Select(x => x.Title).ToArray()
-                };
+                var personData = _mapper.Map<ActorDetailsViewModel>(person);
 
                 response.Status = true;
                 response.Message = "Success";
