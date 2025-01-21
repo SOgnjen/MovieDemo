@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MovieAPIDemo.Data;
 using MovieAPIDemo.Entities;
 using MovieAPIDemo.Models;
@@ -38,9 +39,9 @@ namespace MovieAPIDemo.Controllers
 
                 return Ok(response);
             }
-            catch(System.Exception ex)
+            catch (System.Exception ex)
             {
-                response.Status =false;
+                response.Status = false;
                 response.Message = "Something went wrong";
 
                 return BadRequest(response);
@@ -56,7 +57,7 @@ namespace MovieAPIDemo.Controllers
             {
                 var person = _context.Person.Where(x => x.Id == id).FirstOrDefault();
 
-                if(person == null)
+                if (person == null)
                 {
                     response.Status = false;
                     response.Message = "Record Not Exist";
@@ -65,6 +66,7 @@ namespace MovieAPIDemo.Controllers
                 }
 
                 var personData = _mapper.Map<ActorDetailsViewModel>(person);
+                personData.Movies = _context.Movie.Where(x => x.Actors.Contains(person)).Select(x => x.Title).ToArray();
 
                 response.Status = true;
                 response.Message = "Success";
@@ -81,8 +83,37 @@ namespace MovieAPIDemo.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("Search/{searchText}")]
+        public IActionResult Get(string searchText)
+        {
+            BaseResponseModel response = new BaseResponseModel();
+
+            try
+            {
+                var searchedPerson = _context.Person.Where(x => x.Name.Contains(searchText)).Select(x => new
+                {
+                    x.Id,
+                    x.Name
+                }).ToList();
+
+                response.Status = true;
+                response.Message = "Success";
+                response.Data = searchedPerson;
+
+                return Ok(response);
+            }
+            catch (System.Exception ex)
+            {
+                response.Status = false;
+                response.Message = "Something went wrong";
+
+                return BadRequest(response);
+            }
+        }
+
         [HttpPost]
-        public IActionResult Post(ActorViewModel model) 
+        public IActionResult Post(ActorViewModel model)
         {
             BaseResponseModel response = new BaseResponseModel();
 
@@ -116,6 +147,94 @@ namespace MovieAPIDemo.Controllers
                 }
             }
             catch (System.Exception ex)
+            {
+                response.Status = false;
+                response.Message = "Something went wrong";
+
+                return BadRequest(response);
+            }
+        }
+
+        [HttpPut]
+        public IActionResult Put(ActorViewModel model)
+        {
+            BaseResponseModel response = new BaseResponseModel();
+
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var postedModel = _mapper.Map<Person>(model);
+
+                    if (model.Id <= 0)
+                    {
+                        response.Status = false;
+                        response.Message = "Invalid Person Record";
+
+                        return BadRequest(response);
+                    }
+
+                    var personDetails = _context.Person.Where(x => x.Id == model.Id).AsNoTracking().FirstOrDefault();
+                    if (personDetails == null)
+                    {
+                        response.Status = false;
+                        response.Message = "Invalid person record";
+
+                        return BadRequest(response);
+                    }
+
+                    _context.Person.Update(postedModel);
+                    _context.SaveChanges();
+
+                    response.Status = true;
+                    response.Message = "Updated successfully";
+                    response.Data = postedModel;
+
+                    return Ok(response);
+                }
+                else
+                {
+                    response.Status = false;
+                    response.Message = "Model not valid";
+                    response.Data = ModelState;
+
+                    return BadRequest(response);
+                }
+            }
+            catch (System.Exception ex)
+            {
+                response.Status = false;
+                response.Message = "Something went wrong";
+
+                return BadRequest(response);
+            }
+        }
+
+        [HttpDelete]
+        public IActionResult Delete(int id)
+        {
+            BaseResponseModel response = new BaseResponseModel();
+
+            try
+            {
+                var person = _context.Person.Where(x => x.Id == id).FirstOrDefault();
+                if(person == null)
+                {
+                    response.Status = false;
+                    response.Message = "Invalid Person Record";
+
+                    return BadRequest(response);
+                }
+
+                _context.Person.Remove(person);
+                _context.SaveChanges();
+
+                response.Status = true;
+                response.Message = "Deleted successfully";
+
+                return Ok(response);
+            }
+            catch (System.Exception)
             {
                 response.Status = false;
                 response.Message = "Something went wrong";

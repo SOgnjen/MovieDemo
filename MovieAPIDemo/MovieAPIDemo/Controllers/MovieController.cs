@@ -288,7 +288,7 @@ namespace MovieAPIDemo.Controllers
                     Directory.CreateDirectory(newPath);
                 }
 
-                string[] allowedImageExtensions = new string[] { ".jgp", ".jpeg", ".png" };
+                string[] allowedImageExtensions = new string[] { ".jpg", ".jpeg", ".png" };
 
                 if(!allowedImageExtensions.Contains(Path.GetExtension(filename)))
                 {
